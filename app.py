@@ -527,7 +527,7 @@ def main():
         st.session_state.language = selected_language
         st.rerun()
     if 'user_data' in st.session_state:
-    st.session_state.user_data['language'] = st.session_state.language
+        st.session_state.user_data['language'] = st.session_state.language
     
     
     pages = ["Home", "Create Nutrition Plan", "About", "Help"]
