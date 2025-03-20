@@ -11,6 +11,10 @@ import seaborn as sns
 from dotenv import load_dotenv
 import base64
 from pathlib import Path
+import io
+from reportlab.lib.pagesizes import letter
+from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer
+from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
 
 # Load environment variables
 load_dotenv(override=True)
@@ -509,6 +513,47 @@ def interpret_blood_sugar(value, type):
         else:
             return "Diabetes"
     return "Unknown"
+def create_pdf(nutrition_plan_text):
+    """Convert nutrition plan text to PDF format"""
+    buffer = io.BytesIO()
+    doc = SimpleDocTemplate(buffer, pagesize=letter)
+    styles = getSampleStyleSheet()
+    
+    # Create a custom style for Arabic if needed
+    if st.session_state.language == "العربية":
+        styles.add(ParagraphStyle(name='Arabic', 
+                                 fontName='Helvetica',
+                                 alignment=1,  # 0=left, 1=center, 2=right
+                                 leading=14))
+        style_to_use = styles["Arabic"]
+    else:
+        style_to_use = styles["Normal"]
+    
+    # Split the text by lines
+    story = []
+    
+    # Add a title
+    title_text = "Diabetes Nutrition Plan"
+    if st.session_state.language == "Français":
+        title_text = "Plan Nutritionnel pour le Diabète"
+    elif st.session_state.language == "العربية":
+        title_text = "خطة التغذية لمرضى السكري"
+        
+    story.append(Paragraph(title_text, styles["Title"]))
+    story.append(Spacer(1, 12))
+    
+    # Add the content
+    lines = nutrition_plan_text.split('\n')
+    for line in lines:
+        if line.strip():
+            p = Paragraph(line, style_to_use)
+            story.append(p)
+            story.append(Spacer(1, 6))
+    
+    doc.build(story)
+    buffer.seek(0)
+    return buffer
+
 
 def main():
     # Sidebar for navigation
@@ -810,11 +855,13 @@ def main():
                 
                 # Download option
                 plan_text = st.session_state.nutrition_plan
+                pdf_data = create_pdf(plan_text)
+    
                 st.download_button(
                     label=get_translation("download_button"),
-                    data=plan_text,
-                    file_name="my_diabetes_nutrition_plan.txt",
-                    mime="text/plain"
+                    data=pdf_data,
+                    file_name="diabetes_nutrition_plan.pdf",
+                    mime="application/pdf"
                 )
                 
                 # Display visual guide if available for low literacy users
