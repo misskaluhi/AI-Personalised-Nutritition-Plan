@@ -472,7 +472,7 @@ def interpret_blood_sugar(value, type):
 
 def main():
     # Sidebar for navigation
-    st.sidebar.image("https://cdn-icons-png.flaticon.com/512/3373/3373383.png", width=100)
+    st.sidebar.image("https://t4.ftcdn.net/jpg/01/58/87/77/360_F_158877761_vSJ4nKTUvQG8OYgsIJUTpeBwiqm6cynN.jpg", width=100)
     st.sidebar.title("Navigation")
     
     pages = ["Home", "Create Nutrition Plan", "About", "Help"]
