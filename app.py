@@ -517,7 +517,7 @@ def main():
             st.markdown("</div>", unsafe_allow_html=True)
             
         with col2:
-            st.image("https://t4.ftcdn.net/jpg/01/58/87/77/360_F_158877761_vSJ4nKTUvQG8OYgsIJUTpeBwiqm6cynN.jpg", width=600)
+            st.image("https://t4.ftcdn.net/jpg/01/58/87/77/360_F_158877761_vSJ4nKTUvQG8OYgsIJUTpeBwiqm6cynN.jpg", width=1000)
         
         # Statistics and facts
         st.markdown("<h2 class='sub-header'>Diabetes: Facts & Figures</h2>", unsafe_allow_html=True)
