@@ -512,7 +512,7 @@ def interpret_blood_sugar(value, type):
 
 def main():
     # Sidebar for navigation
-    st.sidebar.image("https://t4.ftcdn.net/jpg/01/58/87/77/360_F_158877761_vSJ4nKTUvQG8OYgsIJUTpeBwiqm6cynN.jpg", width=250)
+    st.sidebar.image("https://img.freepik.com/free-photo/buddha-bowl-dish-with-vegetables-legumes-top-view_1150-42599.jpg", width=250)
     st.sidebar.title("Navigation")
 
     # Add language selector
