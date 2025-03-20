@@ -129,7 +129,44 @@ st.markdown("""
     }
 </style>
 """, unsafe_allow_html=True)
-
+def get_translation(key, language=None):
+    """
+    Get translated text based on the language setting
+    """
+    if language is None:
+        language = st.session_state.get('language', 'English')
+    
+    translations = {
+        "English": {
+            "generate_button": "Generate Personalized Nutrition Plan",
+            "download_button": "Download Nutrition Plan",
+            "api_error": "Please enter your OpenAI API key in the sidebar to generate a plan.",
+            "generating": "Generating your personalized nutrition plan...",
+            "visual_generating": "Creating visual guide for improved comprehension...",
+            "plan_header": "Your Personalized Nutrition Plan"
+        },
+        "Français": {
+            "generate_button": "Générer un Plan Nutritionnel Personnalisé",
+            "download_button": "Télécharger le Plan Nutritionnel",
+            "api_error": "Veuillez entrer votre clé API OpenAI dans la barre latérale pour générer un plan.",
+            "generating": "Génération de votre plan nutritionnel personnalisé...",
+            "visual_generating": "Création d'un guide visuel pour une meilleure compréhension...",
+            "plan_header": "Votre Plan Nutritionnel Personnalisé"
+        },
+        "العربية": {
+            "generate_button": "توليد خطة تغذية مخصصة",
+            "download_button": "تنزيل خطة التغذية",
+            "api_error": "يرجى إدخال مفتاح API الخاص بك من OpenAI في الشريط الجانبي لتوليد خطة.",
+            "generating": "جاري إنشاء خطة التغذية المخصصة الخاصة بك...",
+            "visual_generating": "إنشاء دليل مرئي لفهم أفضل...",
+            "plan_header": "خطة التغذية المخصصة الخاصة بك"
+        }
+    }
+    
+    if language in translations and key in translations[language]:
+        return translations[language][key]
+    return key  # Return the key itself if translation not found
+    
 # Define the OpenAI API function
 def generate_nutrition_plan(user_data, food_data):
     """
@@ -181,6 +218,8 @@ def generate_nutrition_plan(user_data, food_data):
         # Prepare the prompt for the nutrition plan
         prompt = f"""
         Create a personalized nutrition plan for a person with diabetes with the following characteristics:
+
+        Language Preference: {user_data.get('language', 'English')}
         
         Health Information:
         - Age: {user_data['age']}
@@ -295,6 +334,7 @@ def generate_visual_guide(user_data, nutrition_plan, food_data):
         prompt = f"""
         Create a text description of a visual guide for a diabetes nutrition plan specifically for Mauritania. 
         This will be used to explain healthy eating to someone with limited literacy.
+        Language Preference: {user_data.get('language', 'English')}
         
         The person has:
         - Type of Diabetes: {user_data['diabetes_type']}
@@ -474,6 +514,21 @@ def main():
     # Sidebar for navigation
     st.sidebar.image("https://t4.ftcdn.net/jpg/01/58/87/77/360_F_158877761_vSJ4nKTUvQG8OYgsIJUTpeBwiqm6cynN.jpg", width=150)
     st.sidebar.title("Navigation")
+
+    # Add language selector
+    language_options = ["English", "Français", "العربية"]
+    selected_language = st.sidebar.selectbox("Language / Langue / اللغة", language_options, index=0)
+    
+    # Store language in session state
+    if 'language' not in st.session_state:
+        st.session_state.language = "English"
+        
+    if selected_language != st.session_state.language:
+        st.session_state.language = selected_language
+        st.rerun()
+    if 'user_data' in st.session_state:
+    st.session_state.user_data['language'] = st.session_state.language
+    
     
     pages = ["Home", "Create Nutrition Plan", "About", "Help"]
     choice = st.sidebar.radio("Go to", pages)
@@ -566,6 +621,7 @@ def main():
                 'literacy': 'Basic',
                 'cooking_access': 'Moderate (stovetop)',
                 'refrigeration': 'Limited'
+                'language': 'English'
             }
             # Calculate initial BMI
             st.session_state.user_data['bmi'] = calculate_bmi(
@@ -722,13 +778,12 @@ def main():
                 st.markdown(f"- **Refrigeration:** {st.session_state.user_data['refrigeration']}")
             
             st.markdown("</div>", unsafe_allow_html=True)
-            
             # Generate plan button
-            if st.button("Generate Personalized Nutrition Plan", type="primary"):
-                with st.spinner("Generating your personalized nutrition plan..."):
+            if st.button(get_translation("generate_button"), type="primary"):
+                with st.spinner(get_translation("generating")):
                     # Check if API key is available
                     if not os.getenv("OPENAI_API_KEY"):
-                        st.error("Please enter your OpenAI API key in the sidebar to generate a plan.")
+                        st.error(get_translation("api_error"))
                     else:
                         # Generate the nutrition plan with Mauritanian food data
                         nutrition_plan = generate_nutrition_plan(st.session_state.user_data, mauritania_food_data)
@@ -738,7 +793,7 @@ def main():
                             
                             # If literacy level is basic or limited, generate visual guide
                             if st.session_state.user_data['literacy'] in ['Limited/None', 'Basic']:
-                                with st.spinner("Creating visual guide for improved comprehension..."):
+                                with st.spinner(get_translation("visual_generating")):
                                     visual_description, visual_guide_data = generate_visual_guide(st.session_state.user_data, nutrition_plan, mauritania_food_data)
                                     if visual_description:
                                         st.session_state.visual_description = visual_description
@@ -747,7 +802,7 @@ def main():
             
             # Display the generated nutrition plan if available
             if 'nutrition_plan' in st.session_state:
-                st.markdown("<h3>Your Personalized Nutrition Plan</h3>", unsafe_allow_html=True)
+                st.markdown(f"<h3>{get_translation('plan_header')}</h3>", unsafe_allow_html=True)
                 st.markdown("<div class='card'>", unsafe_allow_html=True)
                 st.markdown(st.session_state.nutrition_plan)
                 st.markdown("</div>", unsafe_allow_html=True)
@@ -755,7 +810,7 @@ def main():
                 # Download option
                 plan_text = st.session_state.nutrition_plan
                 st.download_button(
-                    label="Download Nutrition Plan",
+                    label=get_translation("download_button"),
                     data=plan_text,
                     file_name="my_diabetes_nutrition_plan.txt",
                     mime="text/plain"
