@@ -620,8 +620,9 @@ def main():
                 'education': 'Secondary/High School',
                 'literacy': 'Basic',
                 'cooking_access': 'Moderate (stovetop)',
-                'refrigeration': 'Limited'
-                'language': 'English'
+                'refrigeration': 'Limited',
+                'language': 'English',
+                
             }
             # Calculate initial BMI
             st.session_state.user_data['bmi'] = calculate_bmi(
